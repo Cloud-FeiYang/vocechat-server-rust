@@ -33,70 +33,18 @@ pub fn get_referer_domain(req: &Request) -> Option<String> {
         .or_else(|| u.host().map(|v| v.to_string()))
 }
 
-pub async fn load_license(state: &State) -> Result<()> {
-    let mut license_path = state.config.system.data_dir.clone();
-    license_path.push("license");
-    if !license_path.exists() {
-        tokio::fs::write(&license_path, VOCE_LICENSE_DEFAULT).await?;
-    }
-    let license_bs58 = tokio::fs::read_to_string(&license_path).await?;
-    let license = License::from_string(license_bs58)?;
-
-    G_LICENSE.lock().await.created_at = license.created_at;
-    G_LICENSE.lock().await.expired_at = license.expired_at;
-    G_LICENSE.lock().await.user_limit = license.user_limit;
-    G_LICENSE.lock().await.domains = license.domains;
-    G_LICENSE.lock().await.sign = license.sign;
-
+pub async fn load_license(_state: &State) -> Result<()> {
     Ok(())
 }
 
-pub async fn update_license(state: &State, new_license: &str) -> Result<()> {
-    let license = vc_license::License::from_string(new_license.to_string())?;
-    let mut license_path = state.config.system.data_dir.clone();
-    license_path.push("license");
-    std::fs::write(license_path, new_license.as_bytes())?;
-
-    G_LICENSE.lock().await.created_at = license.created_at;
-    G_LICENSE.lock().await.expired_at = license.expired_at;
-    G_LICENSE.lock().await.user_limit = license.user_limit;
-    G_LICENSE.lock().await.domains = license.domains;
-    G_LICENSE.lock().await.sign = license.sign;
-
+pub async fn update_license(_state: &State, _new_license: &str) -> Result<()> {
     Ok(())
 }
+
 
 /// inline always, Increase the difficulty of disassembly
 #[inline(always)]
-pub async fn check_license(state: &State, req: &Request) -> Result<()> {
-    Ok(())
-}
-    let domain = get_referer_domain(req)
-        .ok_or_else(|| anyhow::anyhow!("License error: Referer is empty."))?;
-    let license_guard = G_LICENSE.lock().await;
-    let license = license_guard.deref();
-    if domain == "localhost" {
-        return Ok(());
-    }
-    if !license.domains.contains(&domain) && !license.domains.contains(&"*".to_string()) {
-        return Err(anyhow::anyhow!("License error: Domain incorrect."));
-    }
-    if license.expired_at < Utc::now() {
-        return Err(anyhow::anyhow!("License error: Expired."));
-    }
-    if vc_license::rsa_check_license(license, VOCE_LICENSE_PUBLIC_KEY_PEM).is_err() {
-        return Err(anyhow::anyhow!("License error: Sign invalid."));
-    }
-    let cache = state.cache.read().await;
-    if cache
-        .users
-        .iter()
-        .filter(|(_, user)| !user.is_guest)
-        .count()
-        > license.user_limit as usize
-    {
-        return Err(anyhow::anyhow!("License error: Users reached limit."));
-    }
+pub async fn check_license(_state: &State, _req: &Request) -> Result<()> {
     Ok(())
 }
 
