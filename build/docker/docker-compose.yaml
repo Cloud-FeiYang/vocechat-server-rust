@@ -7,11 +7,11 @@ services:
       context: .
       dockerfile: Dockerfile
     command:
-        "/docker-entrypoint.sh"
-        - "--network.bind"
-        - "0.0.0.0:3000"
-        - "--network.domain"
-        - "localhost"
+      - "/docker-entrypoint.sh"
+      - "--network.bind"
+      - "0.0.0.0:3000"
+      - "--network.domain"
+      - "localhost"
 #    environment:
 #      - UID=1000
 #      - GID=1000
