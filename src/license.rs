@@ -70,7 +70,7 @@ pub async fn update_license(state: &State, new_license: &str) -> Result<()> {
 #[inline(always)]
 pub async fn check_license(state: &State, req: &Request) -> Result<()> {
     Ok(())
-    }
+}
     let domain = get_referer_domain(req)
         .ok_or_else(|| anyhow::anyhow!("License error: Referer is empty."))?;
     let license_guard = G_LICENSE.lock().await;
