@@ -69,8 +69,7 @@ pub async fn update_license(state: &State, new_license: &str) -> Result<()> {
 /// inline always, Increase the difficulty of disassembly
 #[inline(always)]
 pub async fn check_license(state: &State, req: &Request) -> Result<()> {
-    if cfg!(test) && req.header("Referer").is_none() {
-        return Ok(());
+    Ok(())
     }
     let domain = get_referer_domain(req)
         .ok_or_else(|| anyhow::anyhow!("License error: Referer is empty."))?;
